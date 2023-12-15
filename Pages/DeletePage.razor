@@ -1,0 +1,78 @@
+﻿@page "/delete/{id:int}"
+@using ProjectManagementApp.Data;
+@using System.Security.Claims;
+@inject ProjectsService ProjectsService
+@inject NavigationManager NavigationManager
+
+<h3>Deletion confirmation</h3>
+@if (Project == null)
+{
+    <h4>Loading project details...</h4>
+}
+else
+{
+    <table>
+        <tbody>
+            <tr>
+                <td><p class="text-black">Project title</p></td>
+                <td>@Project.Title</td>
+            </tr>
+            <tr>
+                <td><p class="text-black">Project status</p></td>
+                <td>@Project.Title</td>
+            </tr>
+            <tr>
+                <td><p class="text-black">Project title</p></td>
+                <td>@Project.Title</td>
+            </tr>
+        </tbody>
+    </table>
+    <p class="text-black">Are you sure you want to delete this project?</p>
+    <div class="d-flex gap-3">
+        <button class="btn btn-danger" @onclick="@Submit">Delete</button>
+        <a class="btn btn-primary" href="/">Cancel</a>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationStateTask { get; set; }
+
+    private Projects Project { get; set; }
+    private ClaimsPrincipal? currentUser;
+
+    protected override void OnInitialized()
+    {
+        Project = new Projects();
+        if (authenticationStateTask == null)
+        {
+            NavigationManager.NavigateTo("/");
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (authenticationStateTask != null)
+        {
+            var user = (await authenticationStateTask).User;
+            if (user.Identity != null)
+            {
+                currentUser = user;
+                Project = ProjectsService.GetProjectData(Id);
+            }
+        }
+    }
+
+    private void Submit()
+    {
+        if (currentUser == null)
+        {
+            return;
+        }
+        ProjectsService.DeleteProject(Id);
+        NavigationManager.NavigateTo("/");
+    }
+}

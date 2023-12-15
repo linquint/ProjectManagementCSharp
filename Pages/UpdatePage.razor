@@ -1,0 +1,73 @@
+﻿@page "/update/{id:int}"
+@using ProjectManagementApp.Data;
+@using System.Security.Claims;
+@inject ProjectsService ProjectsService
+@inject NavigationManager NavigationManager
+
+<a class="btn btn-secondary mb-4" href="/">Back to projects list</a>
+
+<h3>Add new project</h3>
+
+<EditForm Model=@Project OnSubmit=@Submit>
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="mb-3">
+        <label for="Title" class="form-label">Project title</label>
+        <InputText @bind-Value=@Project.Title class="form-control" id="Title" />
+    </div>
+    <div class="mb-3">
+        <label for="Description">Project description</label>
+        <InputTextArea class="form-control" id="Description" @bind-Value=@Project.Description />
+    </div>
+    <div class="mb-3">
+        <label for="dateDue" class="form-label">Date due</label>
+        <InputDate @bind-Value=@Project.DateDue class="form-control" id="DateDue" />
+    </div>
+    <div class="d-flex gap-3">
+        <button type="submit" class="btn btn-primary">Update</button>
+        <a class="btn btn-secondary" href="/">Cancel</a>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationStateTask { get; set; }
+
+    private Projects Project { get; set; }
+    private ClaimsPrincipal? currentUser;
+
+    protected override void OnInitialized()
+    {
+        Project = new Projects();
+        if (authenticationStateTask == null)
+        {
+            NavigationManager.NavigateTo("/");
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (authenticationStateTask != null)
+        {
+            var user = (await authenticationStateTask).User;
+            if (user.Identity != null)
+            {
+                currentUser = user;
+                Project = ProjectsService.GetProjectData(Id);
+            }
+        }
+    }
+
+    private void Submit()
+    {
+        if (currentUser == null)
+        {
+            return;
+        }
+        ProjectsService.UpdateProject(Project);
+        NavigationManager.NavigateTo("/");
+    }
+}

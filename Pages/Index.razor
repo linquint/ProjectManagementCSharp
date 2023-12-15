@@ -1,0 +1,23 @@
+﻿@page "/"
+@using Microsoft.AspNetCore.Identity
+
+<PageTitle>Project Management</PageTitle>
+
+<h1>Project Management</h1>
+
+Project management app built using Blazor.
+
+<AuthorizeView>
+    <Authorized>
+        <ProjectList />
+    </Authorized>
+    <NotAuthorized>
+        <div class="d-flex w-100 mt-5 fs-4 align-items-center justify-content-center">
+            <p>Please log in first to manage your projects.</p>
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    
+}

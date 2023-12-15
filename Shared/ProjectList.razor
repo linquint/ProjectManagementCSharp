@@ -1,0 +1,59 @@
+﻿@using ProjectManagementApp.Data;
+@using System.Security.Claims;
+@inject ProjectsService ProjectsService
+
+<div>
+    @if (userProjects == null)
+    {
+        <p>Loading...</p>
+    }
+    else
+    {
+        <p class="fs-5">Projects found: @userProjects.Count</p>
+        <div class="d-flex gap-1 flex-row">
+            <a class="btn btn-success" href="/new">New project</a>
+        </div>
+        @if (userProjects.Count > 0)
+        {
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Title</th>
+                        <th>Creator</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var project in userProjects)
+                    {
+                        <tr>
+                            <td>@project.ProjectStatus</td>
+                            <td>@project.Title</td>
+                            <td>@project.CreatedBy</td>
+                            <td><a class="btn btn-primary" href="/update/@project.Id">Update</a></td>
+                            <td><a class="btn btn-danger" href="/delete/@project.Id">Delete</a></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    }
+</div>
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationStateTask { get; set; }
+    private List<Projects>? userProjects;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (authenticationStateTask != null)
+        {
+            var user = (await authenticationStateTask).User;
+            if (user.Identity != null)
+            {
+                userProjects = await ProjectsService.GetProjects(user.FindFirstValue(ClaimTypes.NameIdentifier));
+            }
+        }
+    }
+}

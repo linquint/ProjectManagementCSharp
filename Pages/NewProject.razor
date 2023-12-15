@@ -1,0 +1,67 @@
+﻿@page "/new"
+@using ProjectManagementApp.Data;
+@using System.Security.Claims;
+@inject ProjectsService ProjectsService
+@inject NavigationManager NavigationManager
+
+<a class="btn btn-secondary mb-4" href="/">Back to projects list</a>
+
+<h3>Add new project</h3>
+
+<EditForm Model=@Project OnSubmit=@Submit>
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="mb-3">
+        <label for="Title" class="form-label">Project title</label>
+        <InputText @bind-Value=@Project.Title class="form-control" id="Title" />
+    </div>
+    <div class="mb-3">
+        <label for="Description">Project description</label>
+        <InputTextArea class="form-control" id="Description" @bind-Value=@Project.Description />
+    </div>
+    <div class="mb-3">
+        <label for="dateDue" class="form-label">Date due</label>
+        <InputDate @bind-Value=@Project.DateDue class="form-control" id="DateDue" />
+    </div>
+    <button type="submit" class="btn btn-primary">Add</button>
+</EditForm>
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationStateTask { get; set; }
+
+    private Projects Project { get; set; }
+    private ClaimsPrincipal? currentUser;
+
+    protected override void OnInitialized()
+    {
+        Project = new Projects();
+        if (authenticationStateTask == null)
+        {
+            NavigationManager.NavigateTo("/");
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (authenticationStateTask != null)
+        {
+            var user = (await authenticationStateTask).User;
+            if (user.Identity != null)
+            {
+                currentUser = user;
+            }
+        }
+    }
+
+    private async void Submit()
+    {
+        if (currentUser == null)
+        {
+            return;
+        }
+        Project.CreatedBy = currentUser.FindFirstValue(ClaimTypes.NameIdentifier);
+        ProjectsService.AddProject(Project);
+        NavigationManager.NavigateTo("/");
+    }
+}
