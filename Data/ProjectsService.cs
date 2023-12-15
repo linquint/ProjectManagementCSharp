@@ -20,10 +20,6 @@ namespace ProjectManagementApp.Data
                 List<Projects> projects = await _context.Projects
                     .Where(p => p.CreatedBy == UserId)
                     .ToListAsync();
-                foreach (Projects project in projects)
-                {
-                    project.Tasks = await TasksService.GetTasksForProject(project.Id);
-                }
             }
             catch
             {
