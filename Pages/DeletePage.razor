@@ -11,19 +11,19 @@
 }
 else
 {
-    <table>
+    <table class="projects-table">
         <tbody>
             <tr>
-                <td><p class="text-black">Project title</p></td>
+                <td><span class="fw-bold me-3">Project title</span></td>
                 <td>@Project.Title</td>
             </tr>
             <tr>
-                <td><p class="text-black">Project status</p></td>
-                <td>@Project.Title</td>
+                <td><span class="fw-bold me-3">Project status</span></td>
+                <td>@Project.StatusAsString</td>
             </tr>
             <tr>
-                <td><p class="text-black">Project title</p></td>
-                <td>@Project.Title</td>
+                <td><span class="fw-bold me-3">Project&nbsp;description</span></td>
+                <td>@Project.Description</td>
             </tr>
         </tbody>
     </table>
@@ -61,7 +61,7 @@ else
             if (user.Identity != null)
             {
                 currentUser = user;
-                Project = ProjectsService.GetProjectData(Id);
+                Project = await ProjectsService.GetProjectData(Id);
             }
         }
     }

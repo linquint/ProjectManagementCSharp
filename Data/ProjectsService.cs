@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ProjectManagementApp.Interfaces;
-using ProjectManagementApp.Data;
 
 namespace ProjectManagementApp.Data
 {
@@ -17,13 +16,19 @@ namespace ProjectManagementApp.Data
         {
             try
             {
-                List<Projects> projects = await _context.Projects
-                    .Where(p => p.CreatedBy == UserId)
-                    .ToListAsync();
+              List<Projects> projects = await _context.Projects
+                .Where(p => p.CreatedBy == UserId)
+                .ToListAsync();
+              foreach (Projects project in projects)
+              {
+                TasksService tasksService = new (_context);
+                project.Tasks = await tasksService.GetTasksForProject(project.Id);
+              }
+              return projects;
             }
             catch
             {
-                throw;
+              throw;
             }
         }
 
@@ -47,6 +52,13 @@ namespace ProjectManagementApp.Data
                 Projects? OldProject = _context.Projects.Find(newProject.Id);
                 if (OldProject != null)
                 {
+                    if (OldProject.ProjectStatus < 2 && newProject.ProjectStatus == 2 && newProject.TasksCompleted < newProject.TaskCount)
+                    {
+                        throw new ProjectStatusChangeException(newProject.StatusAsString);
+                    }
+                    {
+                        newProject.DateDue = DateTime.Now;
+                    }
                     _context.Entry(OldProject).CurrentValues.SetValues(newProject);
                     _context.SaveChanges();
                 }
@@ -61,18 +73,20 @@ namespace ProjectManagementApp.Data
             }
         }
 
-        public override Projects GetProjectData(int id)
+        public override async Task<Projects> GetProjectData(int id)
         {
             try
             {
-                Projects? project = _context.Projects.Find(id);
+                Projects? project = await _context.Projects.FindAsync(id);
                 if (project != null)
                 {
+                    TasksService tasksService = new (_context);
+                    project.Tasks = await tasksService.GetTasksForProject(project.Id);
                     return project;
                 }
                 else
                 {
-                    throw new ArgumentNullException();
+                    throw new ProjectNotFoundException(id);
                 }
             }
             catch

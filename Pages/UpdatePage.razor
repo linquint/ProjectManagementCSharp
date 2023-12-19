@@ -36,7 +36,7 @@
     [CascadingParameter]
     private Task<AuthenticationState>? authenticationStateTask { get; set; }
 
-    private Projects Project { get; set; }
+    private Projects? Project { get; set; }
     private ClaimsPrincipal? currentUser;
 
     protected override void OnInitialized()
@@ -56,7 +56,7 @@
             if (user.Identity != null)
             {
                 currentUser = user;
-                Project = ProjectsService.GetProjectData(Id);
+                Project = await ProjectsService.GetProjectData(Id);
             }
         }
     }

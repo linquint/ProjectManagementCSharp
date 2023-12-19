@@ -1,0 +1,49 @@
+.status-box {
+  height: 2rem;
+  width: 2rem;
+  border-radius: 0.5rem;
+  background-color: #999;
+  border: 0.2rem solid #555;
+}
+
+.status-box.id-0 {
+  background-color: #ff5;
+  border-color: #cc4;
+}
+
+.status-box.id-1 {
+  background-color: #46d;
+  border-color: #24a;
+}
+
+.status-box.id-2 {
+  background-color: #7f7;
+  border-color: #3a3;
+}
+
+.status-box.id-3 {
+  background-color: #f77;
+  border-color: #d44;
+}
+
+.status-to {
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all;
+  margin: 1rem 0 2rem;
+}
+
+.status-to:hover {
+  background-color: #333;
+  color: #fff;
+}
+
+.status-to > .status-box {
+  height: 1.5rem;
+  width: 1.5rem;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}

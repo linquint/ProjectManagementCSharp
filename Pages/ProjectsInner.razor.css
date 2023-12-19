@@ -1,0 +1,9 @@
+.task-row td > div {
+  display: flex;
+  align-items: center;
+  min-height: 2.4rem;
+}
+
+.task-row.completed .task-title {
+  text-decoration: line-through;
+}

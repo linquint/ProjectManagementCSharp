@@ -1,13 +1,9 @@
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI;
 using Microsoft.EntityFrameworkCore;
 using ProjectManagementApp.Areas.Identity;
 using ProjectManagementApp.Data;
 using ProjectManagementApp.Interfaces;
-using System.Collections.Generic;
 
 namespace ProjectManagementApp
 {
@@ -24,11 +20,13 @@ namespace ProjectManagementApp
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
             builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
+            builder.Services.AddTransient<ITaskService, TasksService>();
             builder.Services.AddTransient<IProjectService, ProjectsService>();
             builder.Services.AddRazorPages();
             builder.Services.AddServerSideBlazor();
             builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
             builder.Services.AddScoped<ProjectsService>();
+            builder.Services.AddScoped<TasksService>();
             builder.Services.AddDbContext<ProjectManagementContext>(options =>
                 options.UseSqlServer(connectionString));
             

@@ -1,7 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ProjectManagementApp.Interfaces;
-using ProjectManagementApp.Pages;
-using static ProjectManagementApp.Interfaces.ITaskService;
 
 namespace ProjectManagementApp.Data
 {

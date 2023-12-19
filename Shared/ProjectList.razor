@@ -9,29 +9,35 @@
     }
     else
     {
-        <p class="fs-5">Projects found: @userProjects.Count</p>
+        <p class="fs-5">Projects found: <strong>@userProjects.Count</strong></p>
         <div class="d-flex gap-1 flex-row">
             <a class="btn btn-success" href="/new">New project</a>
         </div>
         @if (userProjects.Count > 0)
         {
-            <table class="table">
+            <table class="table project-table">
                 <thead>
                     <tr>
-                        <th></th>
+                        <th style="max-width: 140px"></th>
                         <th>Title</th>
-                        <th>Creator</th>
+                        <th>Created On</th>
+                        <th>Date Due</th>
+                        <th>Task Count</th>
+                        <th></th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var project in userProjects)
                     {
-                        <tr>
-                            <td>@project.ProjectStatus</td>
-                            <td>@project.Title</td>
-                            <td>@project.CreatedBy</td>
-                            <td><a class="btn btn-primary" href="/update/@project.Id">Update</a></td>
-                            <td><a class="btn btn-danger" href="/delete/@project.Id">Delete</a></td>
+                        <tr class="project-row">
+                            <td style="max-width: 140px"><ProgressBox Project="@project" ShowText="false" /></td>
+                            <td><div><a href="/view/project/@project.Id">@project.Title</a></div></td>
+                            <td><div><span>@project.CreatedOn</span></div></td>
+                            <td><div><span>@project.DateDueFormatted</span></div></td>
+                            <td><div class="justify-content-center"><span>@project.TasksCompleted / @project.TaskCount</span></div></td>
+                            <td><div><a class="btn btn-primary" href="/update/@project.Id">Update</a></div></td>
+                            <td><div><a class="btn btn-danger" href="/delete/@project.Id">Delete</a></div></td>
                         </tr>
                     }
                 </tbody>

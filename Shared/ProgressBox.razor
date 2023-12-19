@@ -1,0 +1,54 @@
+@using ProjectManagementApp.Data;
+@using ProjectManagementApp.Interfaces;
+@inject ProjectsService ProjectsService
+
+<div class="d-flex flex-row gap-2 align-items-center" @onclick="() => ChangeStatus = !ChangeStatus && ShowText">
+    <div class="status-box id-@Project.ProjectStatus" title="@Project.StatusAsString"></div>
+    @if (ShowText)
+    {
+        <span class=fs-5>@Project.StatusAsString</span>
+    }
+</div>
+@if (ChangeStatus)
+{
+    <div class="d-flex flex-row gap-1">
+        @foreach (int status in Statuses.Where(status => (int)status != Project.ProjectStatus))
+        {
+            <div class="d-flex gap-1 align-c status-to" @onclick="() => ChangeProjectStatus((int)status)">
+                <div class="status-box id-@status" title="@status.ToString()"></div>
+                <span>@StatusesAsString(status)</span>
+            </div>
+        }
+    </div>
+}
+
+@code
+{
+    [Parameter]
+    public Projects Project { get; set; }
+
+    [Parameter]
+    public bool ShowText { get; set; } = true;
+
+    public bool ChangeStatus { get; set; } = false;
+
+    public List<int> Statuses { get; } = new List<int> { (int)Status.NotStarted, (int)Status.InProgress, (int)Status.Completed, (int)Status.Cancelled };
+    public string StatusesAsString(int status)
+    {
+        return status switch
+        {
+            (int)Status.NotStarted => "Not Started",
+            (int)Status.InProgress => "In Progress",
+            (int)Status.Completed => "Completed",
+            (int)Status.Cancelled => "Cancelled",
+            _ => "Unknown"
+        };
+    }
+
+    public void ChangeProjectStatus(int status)
+    {
+        Project.ProjectStatus = status;
+        ChangeStatus = false;
+        ProjectsService.UpdateProject(Project);
+    }
+}

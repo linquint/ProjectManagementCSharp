@@ -1,0 +1,135 @@
+@page "/view/project/{ProjectId:int}"
+@using ProjectManagementApp.Data;
+@using System.Security.Claims;
+@inject NavigationManager NavigationManager
+@inject ProjectsService ProjectService
+@inject TasksService TasksService
+
+<a class="btn btn-secondary mb-4" href="/">Back to projects list</a>
+
+@if (Project == null) {
+    <p>Loading...</p>
+}
+else
+{
+    <ProgressBox Project="@Project" />
+    <h1>@Project.Title</h1>
+
+    <div class="d-flex flex-row gap-3 my-2">
+        <div><a class="btn btn-primary" href="/update/@Project.Id">Update</a></div>
+        <div><a class="btn btn-danger" href="/delete/@Project.Id">Delete</a></div>
+    </div>
+
+    <p>@Project.Description</p>
+
+    <h3>Tasks</h3>
+    <div class="d-flex gap-2">
+        @if (showTaskForm == false)
+        {
+            <button class="btn btn-primary" @onclick=@DisplayTaskForm>Create new task</button>
+        }
+        else
+        {
+            <button class="btn btn-danger" @onclick=@(() => showTaskForm = false)>Cancel</button>
+            <EditForm Model=@Task OnSubmit=@AddTask class="d-flex gap-2">
+                <InputText type="text" class="form-control" placeholder="Task title" @bind-Value=@Task.Title />
+                <button class="btn btn-primary" type="submit">Add&nbsp;task</button>
+            </EditForm>
+        }
+    </div>
+    @if (Project.Tasks != null && Project.Tasks.Count > 0)
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Title</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var task in Project.Tasks)
+                {
+                    <tr class="task-row @((task.IsComplete ? "completed" : ""))">
+                        <td>
+                            <div>
+                                <input checked=@task.IsComplete type="checkbox" class="form-check-input" @onchange="(() => TaskStatusChange(task))" />
+                            </div>
+                        </td>
+                        <td>
+                            <div>
+                                <span class="task-title">@task.Title</span>
+                            </div>
+                        </td>
+                        <td><div>
+                            <button class="btn btn-danger">Delete</button>
+                        </div></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>No tasks found for this project.</p>
+    }
+}
+
+@code {
+    [Parameter]
+    public int ProjectId { get; set; }
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationStateTask { get; set; }
+
+    private Projects? Project { get; set; }
+    private ClaimsPrincipal? currentUser;
+    private bool showTaskForm = false;
+    private Tasks Task = new ();
+
+    protected override void OnInitialized()
+    {
+        Project = new Projects();
+        if (authenticationStateTask == null)
+        {
+            NavigationManager.NavigateTo("/");
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (authenticationStateTask != null)
+        {
+            var user = (await authenticationStateTask).User;
+            if (user.Identity != null)
+            {
+                currentUser = user;
+                Project = await ProjectService.GetProjectData(ProjectId);
+            }
+        }
+    }
+
+    private void DisplayTaskForm()
+    {
+        Task = new Tasks { ProjectId = ProjectId, Title = "" };
+        showTaskForm = true;
+    }
+
+    public async void AddTask()
+    {
+        TasksService.AddTask(Task);
+        Project!.Tasks = await TasksService.GetTasksForProject(ProjectId);
+        if (Project.ProjectStatus >= (int)Interfaces.Status.Completed)
+        {
+            Project.ProjectStatus = (int)Interfaces.Status.InProgress;
+            ProjectService.UpdateProject(Project);
+        }
+        Task = new Tasks { ProjectId = ProjectId, Title = "" };
+    }
+
+    public void TaskStatusChange(Tasks NewTask)
+    {
+        NewTask.IsComplete = !NewTask.IsComplete;
+        TasksService.UpdateTask(NewTask);
+    }
+}

@@ -1,0 +1,21 @@
+.project-row td > div {
+  display: flex;
+  align-items: center;
+  min-height: 2.4rem;
+}
+
+@media screen and (max-width: 1024px) {
+  .project-table td:nth-child(3), .project-table th:nth-child(3) {
+    display: none;
+  }
+}
+@media screen and (max-width: 768px) {
+  .project-table td:nth-child(4), .project-table th:nth-child(4) {
+    display: none;
+  }
+}
+@media screen and (max-width: 560px) {
+  .project-table td:last-child, .project-table th:last-child {
+    display: none;
+  }
+}

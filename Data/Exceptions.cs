@@ -16,4 +16,10 @@
         public TaskNotFoundException() : base("Task not found") { }
         public TaskNotFoundException(int id) : base(String.Format($"Invalid Task Id: {id}")) { }
     }
+
+    [Serializable]
+    public class ProjectStatusChangeException : Exception
+    {
+        public ProjectStatusChangeException(string status) : base($"Project status cannot be changed to {status}") { }
+    }
 }

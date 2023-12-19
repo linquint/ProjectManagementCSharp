@@ -32,4 +32,29 @@ namespace ProjectManagementApp.Data
         [InverseProperty("Project")]
         public virtual ICollection<Tasks> Tasks { get; set; }
     }
+
+    public partial class Projects
+    {
+        [NotMapped]
+        public int TaskCount { get => Tasks.Count; }
+
+        [NotMapped]
+        public int TasksCompleted { get => Tasks.Count(t => t.IsComplete); }
+
+        [NotMapped]
+        public string DateDueFormatted { get => DateDue?.ToString("yyyy-MM-dd") ?? "Not set"; }
+
+        [NotMapped]
+        public string StatusAsString
+        {
+            get => ProjectStatus switch
+            {
+                0 => "Not started",
+                1 => "In progress",
+                2 => "Completed",
+                3 => "Cancelled",
+                _ => "Unknown"
+            };
+        }
+    }
 }
