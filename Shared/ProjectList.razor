@@ -10,11 +10,21 @@
     else
     {
         <p class="fs-5">Projects found: <strong>@userProjects.Count</strong></p>
+        <p class="fs-6">Tasks: <strong>@TotalTasksCompleted</strong> out of <strong>@TotalTaskCount</strong> completed.</p>
         <div class="d-flex gap-1 flex-row">
             <a class="btn btn-success" href="/new">New project</a>
         </div>
         @if (userProjects.Count > 0)
         {
+            <div class="d-flex gap-2 my-2 align-items-center">
+                <select class="form-select" style="max-width: clamp(160px, 50%, 252px)" @onchange="e => SortByCol = e.Value == null ? 'c' : e.Value.ToString()[0]">
+                    <option value="c">Created At</option>
+                    <option value="d">Date Due</option>
+                    <option value="t">Title</option>
+                </select>
+                <input type="checkbox" class="form-check-input" @bind="SortByAsc" />
+                <span>Ascending</span>
+            </div>
             <table class="table project-table">
                 <thead>
                     <tr>
@@ -28,14 +38,14 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var project in userProjects)
+                    @foreach (var project in SortedProjects)
                     {
                         <tr class="project-row">
                             <td style="max-width: 140px"><ProgressBox Project="@project" ShowText="false" /></td>
                             <td><div><a href="/view/project/@project.Id">@project.Title</a></div></td>
                             <td><div><span>@project.CreatedOn</span></div></td>
                             <td><div><span>@project.DateDueFormatted</span></div></td>
-                            <td><div class="justify-content-center"><span>@project.TasksCompleted / @project.TaskCount</span></div></td>
+                            <td><div class="justify-content-center"><span>@project.TasksCompleted / @project.TaskCount (@project.Progress%)</span></div></td>
                             <td><div><a class="btn btn-primary" href="/update/@project.Id">Update</a></div></td>
                             <td><div><a class="btn btn-danger" href="/delete/@project.Id">Delete</a></div></td>
                         </tr>
@@ -50,6 +60,32 @@
     [CascadingParameter]
     private Task<AuthenticationState>? authenticationStateTask { get; set; }
     private List<Projects>? userProjects;
+    private char SortByCol = 'c'; // c - created at, d - date due, t - title
+    private bool SortByAsc = true;
+    
+    public int TotalTasksCompleted { get => userProjects == null ? 0 : userProjects.Sum(p => p.TasksCompleted); }
+    public int TotalTaskCount { get => userProjects == null ? 0 : userProjects.Sum(p => p.TaskCount); }
+
+    public List<Projects> SortedProjects { get => userProjects == null ? new List<Projects>() : SortByAsc ?
+        (from project in userProjects
+        orderby (SortByCol switch
+            {
+                'c' => (IComparable)project.CreatedOn,
+                'd' => (IComparable)(project.DateDue ?? DateTime.Now),
+                't' => (IComparable)project.Title,
+                _ => (IComparable)project.CreatedOn
+            }) ascending
+        select project).ToList() :
+        (from project in userProjects
+        orderby (SortByCol switch
+            {
+                'c' => (IComparable)project.CreatedOn,
+                'd' => (IComparable)(project.DateDue ?? DateTime.Now),
+                't' => (IComparable)project.Title,
+                _ => (IComparable)project.CreatedOn
+            }) descending
+        select project).ToList();
+    }
 
     protected override async Task OnInitializedAsync()
     {
